@@ -3,3 +3,4 @@
 ## Equipo de Desarrollo
 - Auditor 1: [Miguel Ángel Torres Pino]
 - Auditor 2: [Cristina Mateos]
+- Auditor 3: [David Pavia Perez]
