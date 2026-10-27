@@ -4,6 +4,9 @@
 # Autores: [Miguel Ángel Torres] & [Cristina Mateos] & [David Pavía]
 # =====================================================================
 
+from calculadora import estimar_consumo_wh
+
+
 def menu():
     while True:
         print("\n=========================================")
@@ -34,7 +37,16 @@ def menu():
 
             consumo = potencia * horas
             huella = (consumo / 1000) * 0.23
+            # SIMULACIÓN ITERATIVA PASO A PASO (PARA INSPECCIÓN EN DEPURADOR)
+            print("\nIniciando simulación ciclo a ciclo...")
+            consumo_ciclo = estimar_consumo_wh(potencia, horas)  # Consumo de un solo ciclo
+            consumo_acumulado = 0.0
+            ciclo = 1
 
+            while ciclo <= iteraciones:
+                consumo_acumulado = consumo_acumulado + consumo_ciclo  # <--- PUNTO DE INSPECCIÓN
+                print(f" [Ciclo {ciclo}] Consumo acumulado parcial: {consumo_acumulado:.2f} Wh")
+                ciclo = ciclo + 1
             with open("auditorias.csv", mode="a", encoding="utf-8") as archivo:
                 archivo.write(f"{proceso},{potencia},{horas},{iteraciones},{consumo:.2f},{huella:.4f}\n")
                 print("💾 Registro guardado con éxito en 'auditorias.csv'.")
