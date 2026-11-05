@@ -4,7 +4,13 @@
 # Autores: [Miguel Ángel Torres] & [Cristina Mateos] & [David Pavía]
 # =====================================================================
 
-from calculadora import estimar_consumo_wh
+import os
+
+from calculadora import (
+    calcular_huella_co2,
+    clasificar_etiqueta_energetica,
+    estimar_consumo_wh,
+)
 
 
 def menu():
@@ -30,31 +36,34 @@ def menu():
             potencia = float(input("Potencia del dispositivo en W: ").strip())
             horas = float(input("Horas de uso estimadas: ").strip())
             iteraciones = int(input("Ingrese el número de iteraciones para la auditoría: ").strip())
-
             if iteraciones <= 0:
                 print("Error: El número de iteraciones debe ser un entero positivo.")
                 continue
 
-            consumo = potencia * horas
-            huella = (consumo / 1000) * 0.23
-            # SIMULACIÓN ITERATIVA PASO A PASO (PARA INSPECCIÓN EN DEPURADOR)
+            consumo = estimar_consumo_wh(potencia, horas)
+            eficiencia = clasificar_etiqueta_energetica(consumo)
+            huella = calcular_huella_co2(consumo)
+
             print("\nIniciando simulación ciclo a ciclo...")
-            consumo_ciclo = estimar_consumo_wh(potencia, horas)  # Consumo de un solo ciclo
+            consumo_ciclo = estimar_consumo_wh(potencia, horas)
             consumo_acumulado = 0.0
             ciclo = 1
 
             while ciclo <= iteraciones:
-                consumo_acumulado = consumo_acumulado + consumo_ciclo  # <--- PUNTO DE INSPECCIÓN
+                consumo_acumulado += consumo_ciclo
                 print(f" [Ciclo {ciclo}] Consumo acumulado parcial: {consumo_acumulado:.2f} Wh")
-                ciclo = ciclo + 1
-            with open("auditorias.csv", mode="a", encoding="utf-8") as archivo:
-                archivo.write(f"{proceso},{potencia},{horas},{iteraciones},{consumo:.2f},{huella:.4f}\n")
+                ciclo += 1
+
+            ruta_csv = os.path.join(os.path.dirname(__file__), "auditorias.csv")
+            with open(ruta_csv, mode="a", encoding="utf-8") as archivo:
+                archivo.write(f"{proceso},{potencia},{horas},{iteraciones},{consumo:.2f},{huella:.4f},{eficiencia}\n")
                 print("💾 Registro guardado con éxito en 'auditorias.csv'.")
 
         elif opcion == 2:
             print("\n[OPCIÓN 2] Consultando registros históricos...")
+            ruta_csv = os.path.join(os.path.dirname(__file__), "auditorias.csv")
             try:
-                with open("auditorias.csv", encoding="utf-8") as archivo:
+                with open(ruta_csv, encoding="utf-8") as archivo:
                     print("\n================ HISTORIAL DE AUDITORÍAS ================")
                     print(archivo.read())
             except FileNotFoundError:
